@@ -417,8 +417,14 @@ QString AppConfig::GetAppDataDir()
         return dir1.absolutePath();
     }
 
+    // Development tree fallback: {project}/PXView
+    QDir dev_dir(QCoreApplication::applicationDirPath());
+    if (dev_dir.cd("..") && dev_dir.cd("PXView") && dev_dir.exists("res")) {
+        return dev_dir.absolutePath();
+    }
+
     dsv_err("Data directory is not exists: ../share/PXView");
-    assert(false);   
+    return QCoreApplication::applicationDirPath();
 #else
 
 #ifdef Q_OS_DARWIN
@@ -494,6 +500,13 @@ QString AppConfig::GetDecodeScriptDir()
     if (dir.cd("..") && dir.cd("share")&& dir.cd("PXView")  && dir.cd("libsigrokdecode") && dir.cd("decoders"))
     {
         return dir.absolutePath();        
+    }
+
+    // Development tree fallback: {project}/libsigrokdecode/decoders
+    QDir dev_dir(QCoreApplication::applicationDirPath());
+    if (dev_dir.cd("..") && dev_dir.cd("libsigrokdecode") && dev_dir.cd("decoders"))
+    {
+        return dev_dir.absolutePath();
     }
 #endif
     return "";

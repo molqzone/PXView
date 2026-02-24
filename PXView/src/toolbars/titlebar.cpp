@@ -30,6 +30,7 @@
 #include <QMouseEvent> 
 #include <QPainter>
 #include <QStyleOption>
+#include <QWindow>
 #include <assert.h>
 #include "../config/appconfig.h"
 #include "../appcore/appcontrol.h"
@@ -62,6 +63,7 @@ TitleBar::TitleBar(bool top, QWidget *parent, bool hasClose) :
 
     QHBoxLayout *lay1 = new QHBoxLayout(this);
     _title = new QLabel(this);
+    _title->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     lay1->addWidget(_title);
 
     if (_isTop) {
@@ -202,7 +204,7 @@ void TitleBar::setRestoreButton(bool max)
   
 void TitleBar::mousePressEvent(QMouseEvent* event)
 { 
-    if(event->button() == Qt::LeftButton && !parentWidget()->isMaximized()) 
+    if(event->button() == Qt::LeftButton) 
     {
         int x = event->pos().x();
         int y = event->pos().y(); 
@@ -211,11 +213,21 @@ void TitleBar::mousePressEvent(QMouseEvent* event)
         bool bClick = (x >= 6 && y >= 5 && x <= width() - 6);  //top window need resize hit check
  
         if (!bTopWidow || bClick ){
-            _moving = true; 
-            _clickPos = event->globalPos(); 
-            _oldPos = _parent->pos();     
-            event->accept();
-            return;
+            QWidget *drag_target = _parent ? _parent->window() : window();
+            if (drag_target && drag_target->windowHandle()) {
+                if (drag_target->windowHandle()->startSystemMove()) {
+                    event->accept();
+                    return;
+                }
+            }
+
+            if (!parentWidget()->isMaximized()) {
+                _moving = true;
+                _clickPos = event->globalPos();
+                _oldPos = drag_target ? drag_target->pos() : _parent->pos();
+                event->accept();
+                return;
+            }
         } 
     }  
     QWidget::mousePressEvent(event);
@@ -226,7 +238,10 @@ void TitleBar::mouseMoveEvent(QMouseEvent *event)
     if(_moving){  
        int x = _oldPos.x() + (event->globalPos().x() - _clickPos.x());
        int y = _oldPos.y() + (event->globalPos().y() - _clickPos.y());
-       _parent->move(x, y);  
+       QWidget *drag_target = _parent ? _parent->window() : window();
+       if (drag_target) {
+           drag_target->move(x, y);
+       }
        event->accept();
        return;
     } 

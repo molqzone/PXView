@@ -340,7 +340,7 @@ SR_API int sr_parse_sizestring(const char *sizestring, uint64_t *size)
 	if (multiplier > 0)
 		*size *= multiplier;
 
-	if (*s && strcasecmp(s, "Hz"))
+	if (*s && g_ascii_strcasecmp(s, "Hz"))
 		return SR_ERR;
 
 	return SR_OK;
@@ -448,9 +448,9 @@ SR_API int sr_parse_voltage(const char *voltstr, uint64_t *p, uint64_t *q)
 	if (s && *s) {
 		while (*s == ' ')
 			s++;
-		if (!strcasecmp(s, "mv"))
+		if (!g_ascii_strcasecmp(s, "mv"))
 			*q = 1000L;
-		else if (!strcasecmp(s, "v"))
+		else if (!g_ascii_strcasecmp(s, "v"))
 			*q = 1;
 		else
 			/* Must have a base suffix. */

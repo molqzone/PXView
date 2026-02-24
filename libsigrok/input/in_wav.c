@@ -44,7 +44,7 @@ static int get_wav_header(const char *filename, char *buf)
 	int fd, l;
 
 	l = strlen(filename);
-	if (l <= 4 || strcasecmp(filename + l - 4, ".wav"))
+	if (l <= 4 || g_ascii_strcasecmp(filename + l - 4, ".wav"))
 		return SR_ERR;
 
 	if (stat(filename, &st) == -1)
@@ -208,4 +208,3 @@ SR_PRIV struct sr_input_format input_wav = {
 	.init = init,
 	.loadfile = loadfile,
 };
-
